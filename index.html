@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grandma's Attic Quest</title>
+    <style>
+        :root {
+            --craft-bg: #f7efe0;
+            --craft-border: #c4a882;
+            --craft-text: #3e2f1c;
+            --gold: #c8963e;
+            --gold-light: #e0c278;
+            --warm-shadow: #8b6f4e;
+            --card-front: #faf3e6;
+            --card-back: #fdf6ec;
+            --overlay-dark: rgba(20, 12, 4, 0.65);
+            --glow-color: rgba(255, 245, 210, 0.7);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            overflow: hidden;
+            font-family: 'Georgia', 'Times New Roman', 'Palatino Linotype', serif;
+            background: #2a1f14;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-user-select: none;
+            position: relative;
+        }
+
+        /* ========== BACKGROUND ========== */
+        .bg-layer {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #2a1f14;
+        }
+        .bg-layer img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* ========== ITEMS LAYER ========== */
+        .items-layer {
+            position: fixed;
+            inset: 0;
+            z-index: 10;
+            pointer-events: none;
+        }
+        .items-layer .item {
+            position: absolute;
+            pointer-events: auto;
+            cursor: pointer;
+            width: 13%;
+            aspect-ratio: 1 / 1;
+            object-fit: contain;
+            border-radius: 18px;
+            box-shadow: 0 0 28px 14px var(--glow-color), 0 0 50px 8px rgba(255, 235, 180, 0.35);
+            animation: sway 4s ease-in-out infinite;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.5s ease;
+            will-change: transform;
+        }
+        .items-layer .item:hover {
+            transform: scale(1.12);
+            box-shadow: 0 0 38px 20px rgba(255, 245, 200, 0.9), 0 0 60px 12px rgba(255, 225, 150, 0.5);
+            z-index: 20;
+        }
+        .items-layer .item.solved {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.5);
+            box-shadow: none;
+            transition: opacity 0.6s ease, transform 0.6s ease, box-shadow 0.6s ease;
+        }
+        .items-layer .item.no-sway {
+            animation: none;
+        }
+
+        /* Item positions */
+        .item-chest {
+            bottom: 6%;
+            left: 5%;
+            animation-delay: 0s;
+        }
+        .item-frame {
+            top: 7%;
+            right: 6%;
+            animation-delay: 0.5s;
+        }
+        .item-books {
+            bottom: 8%;
+            left: 50%;
+            transform: translateX(-50%);
+            animation-delay: 1s;
+        }
+        .item-lamp {
+            top: 6%;
+            left: 6%;
+            animation-delay: 1.5s;
+        }
+        .item-mirror {
+            bottom: 7%;
+            right: 5%;
+            animation-delay: 2s;
+        }
+        .item-letter {
+            top: 18%;
+            left: 50%;
+            transform: translateX(-50%);
+            animation-delay: 2.5s;
+        }
+        .item-key {
+            top: 45%;
+            left: 4%;
+            animation-delay: 3s;
+        }
+        .item-hatbox {
+            top: 43%;
+            right: 4%;
+            animation-delay: 3.5s;
+        }
+        .item-books:hover,
+        .item-letter:hover {
+            transform: translateX(-50%) scale(1.12);
+        }
+
+        @keyframes sway {
+            0%,
+            100% {
+                transform: rotate(-2.5deg);
+            }
+            50% {
+                transform: rotate(2.5deg);
+            }
+        }
+        .item-books {
+            animation-name: sway-books;
+        }
+        .item-letter {
+            animation-name: sway-letter;
+        }
+        @keyframes sway-books {
+            0%,
+            100% {
+                transform: translateX(-50%) rotate(-2.5deg);
+            }
+            50% {
+                transform: translateX(-50%) rotate(2.5deg);
+            }
+        }
+        @keyframes sway-letter {
+            0%,
+            100% {
+                transform: translateX(-50%) rotate(-2deg);
+            }
+            50% {
+                transform: translateX(-50%) rotate(2deg);
+            }
+        }
+
+        /* ========== LETTERS BAR ========== */
+        .letters-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 30;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: clamp(6px, 1.2vw, 14px);
+            padding: 12px 20px;
+            background: linear-gradient(to top, rgba(40, 25, 12, 0.92) 0%, rgba(40, 25, 12, 0.7) 70%, transparent 100%);
+            pointer-events: none;
+        }
+        .letter-slot {
+            width: clamp(32px, 5vw, 48px);
+            height: clamp(38px, 5.5vw, 54px);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(18px, 3vw, 28px);
+            font-weight: bold;
+            letter-spacing: 1px;
+            border: 2px solid #6b5a42;
+            background: #4a3a28;
+            color: #7a6a55;
+            transition: all 0.5s ease;
+            position: relative;
+        }
+        .letter-slot.collected {
+            background: #fdf4e3;
+            border-color: #c8963e;
+            color: #8b5e2f;
+            box-shadow: 0 0 18px 6px rgba(200, 150, 60, 0.55);
+            animation: letter-pop 0.5s ease-out;
+        }
+        @keyframes letter-pop {
+            0% {
+                transform: scale(0.6);
+                opacity: 0;
+            }
+            60% {
+                transform: scale(1.2);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        .letter-slot.underscore {
+            color: #5a4a38;
+        }
+
+        /* ========== CARD OVERLAY ========== */
+        .card-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 80;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.35s ease;
+        }
+        .card-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .card-scene {
+            perspective: 900px;
+            width: min(420px, 88vw);
+            height: min(340px, 62vh);
+            position: relative;
+        }
+        .card-inner {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+        .card-inner.flipped {
+            transform: rotateY(180deg);
+        }
+        .card-face {
+            position: absolute;
+            inset: 0;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            border-radius: 18px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        /* Front face */
+        .card-front {
+            background: var(--card-front);
+            border: 4px solid var(--craft-border);
+            z-index: 2;
+            background-image:
+                radial-gradient(ellipse at 20% 20%, rgba(255, 255, 240, 0.5) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 70%, rgba(210, 180, 140, 0.25) 0%, transparent 55%),
+                repeating-linear-gradient(0deg, transparent, transparent 28px, rgba(180, 150, 110, 0.08) 28px, rgba(180, 150, 110, 0.08) 29px);
+        }
+        .card-front .verb-display {
+            font-size: clamp(36px, 7vw, 56px);
+            font-weight: bold;
+            color: var(--craft-text);
+            text-align: center;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        .card-front .flip-hint {
+            font-size: 15px;
+            color: #8b7355;
+            letter-spacing: 0.5px;
+            margin-top: 6px;
+            animation: pulse-hint 2s ease-in-out infinite;
+        }
+        @keyframes pulse-hint {
+            0%,
+            100% {
+                opacity: 0.55;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+        .card-front .tape-strip {
+            position: absolute;
+            top: -6px;
+            left: 50%;
+            transform: translateX(-50%) rotate(-2deg);
+            width: 70px;
+            height: 22px;
+            background: rgba(255, 255, 220, 0.7);
+            border: 1px solid #d4c0a0;
+            border-radius: 3px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Back face */
+        .card-back {
+            background: var(--card-back);
+            border: 4px solid var(--craft-border);
+            transform: rotateY(180deg);
+            z-index: 1;
+            padding: 20px 24px;
+            gap: 10px;
+            background-image:
+                radial-gradient(ellipse at 70% 30%, rgba(255, 255, 240, 0.45) 0%, transparent 55%),
+                radial-gradient(ellipse at 25% 75%, rgba(210, 180, 140, 0.2) 0%, transparent 50%),
+                repeating-linear-gradient(0deg, transparent, transparent 26px, rgba(180, 150, 110, 0.06) 26px, rgba(180, 150, 110, 0.06) 27px);
+        }
+        .card-back .input-group {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .card-back label {
+            font-size: 14px;
+            font-weight: bold;
+            color: #5a3e28;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+            font-size: 12px;
+            margin-bottom: 1px;
+        }
+        .card-back input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 2px solid #c4a882;
+            border-radius: 8px;
+            font-size: 17px;
+            font-family: 'Georgia', 'Times New Roman', serif;
+            background: #fffef9;
+            color: #3e2f1c;
+            outline: none;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            text-align: center;
+            letter-spacing: 0.5px;
+        }
+        .card-back input:focus {
+            border-color: #a07840;
+            box-shadow: 0 0 0 4px rgba(180, 130, 70, 0.15);
+        }
+        .card-back .btn-row {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            margin-top: 4px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .card-back button {
+            padding: 11px 22px;
+            border-radius: 25px;
+            border: none;
+            font-size: 16px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            font-family: 'Georgia', 'Times New Roman', serif;
+            min-height: 44px;
+            min-width: 80px;
+            transition: all 0.25s ease;
+        }
+        .btn-check {
+            background: #c8963e;
+            color: #fffef7;
+            box-shadow: 0 3px 10px rgba(160, 110, 40, 0.4);
+        }
+        .btn-check:hover {
+            background: #d4a54e;
+            box-shadow: 0 5px 16px rgba(160, 110, 40, 0.55);
+            transform: translateY(-2px);
+        }
+        .btn-flip-back {
+            background: #e8dcc8;
+            color: #5a3e28;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+        }
+        .btn-flip-back:hover {
+            background: #f0e6d4;
+        }
+        .btn-close-card {
+            position: absolute;
+            top: 8px;
+            right: 14px;
+            z-index: 10;
+            background: transparent;
+            border: none;
+            font-size: 26px;
+            cursor: pointer;
+            color: #8b6f4e;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            line-height: 1;
+            pointer-events: auto;
+        }
+        .btn-close-card:hover {
+            background: rgba(0, 0, 0, 0.07);
+            color: #4a3020;
+        }
+        .feedback-msg {
+            font-size: 15px;
+            font-weight: bold;
+            text-align: center;
+            min-height: 22px;
+            letter-spacing: 0.4px;
+            transition: color 0.3s ease;
+        }
+        .feedback-msg.correct {
+            color: #3a7d34;
+        }
+        .feedback-msg.incorrect {
+            color: #b84a3a;
+        }
+
+        /* ========== FINAL OVERLAY ========== */
+        .final-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 90;
+            background: var(--overlay-dark);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.8s ease;
+        }
+        .final-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .final-images {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            padding: 20px;
+            z-index: 95;
+        }
+        .final-images img.recipe-card-img {
+            width: min(38%, 420px);
+            height: auto;
+            aspect-ratio: 1 / 1;
+            object-fit: contain;
+            filter: drop-shadow(0 8px 28px rgba(0, 0, 0, 0.6));
+            animation: float-up 0.7s ease-out;
+        }
+        .final-images img.pie-img {
+            width: min(25%, 280px);
+            height: auto;
+            aspect-ratio: 1 / 1;
+            object-fit: contain;
+            filter: drop-shadow(0 6px 22px rgba(0, 0, 0, 0.5));
+            animation: float-up 0.9s ease-out;
+        }
+        @keyframes float-up {
+            0% {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            100% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        .final-message {
+            z-index: 96;
+            font-size: clamp(18px, 3.5vw, 26px);
+            color: #fdf4e3;
+            text-align: center;
+            font-weight: bold;
+            letter-spacing: 0.6px;
+            margin-top: 16px;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+            animation: float-up 1s ease-out;
+            padding: 0 20px;
+        }
+        .final-input-row {
+            z-index: 96;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            margin-top: 10px;
+            animation: float-up 0.8s ease-out;
+        }
+        .final-input-row input {
+            padding: 12px 18px;
+            font-size: 20px;
+            border-radius: 10px;
+            border: 3px solid #c8963e;
+            background: #fffef7;
+            color: #3e2f1c;
+            text-align: center;
+            letter-spacing: 3px;
+            font-family: 'Georgia', 'Times New Roman', serif;
+            font-weight: bold;
+            min-width: 180px;
+            outline: none;
+            transition: box-shadow 0.3s ease;
+        }
+        .final-input-row input:focus {
+            box-shadow: 0 0 0 6px rgba(200, 150, 60, 0.3);
+        }
+        .final-input-row button {
+            padding: 12px 26px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 25px;
+            border: none;
+            background: #c8963e;
+            color: #fffef7;
+            cursor: pointer;
+            min-height: 48px;
+            font-family: 'Georgia', 'Times New Roman', serif;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+            transition: all 0.25s ease;
+        }
+        .final-input-row button:hover {
+            background: #d4a54e;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        /* ========== HEARTS ========== */
+        .hearts-container {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        .heart {
+            position: absolute;
+            top: -60px;
+            font-size: clamp(22px, 4vw, 36px);
+            animation: fall-heart linear forwards;
+            pointer-events: none;
+            opacity: 0.9;
+            filter: drop-shadow(0 2px 6px rgba(255, 100, 130, 0.5));
+        }
+        @keyframes fall-heart {
+            0% {
+                transform: translateY(0) translateX(0) rotate(0deg);
+                opacity: 1;
+            }
+            30% {
+                transform: translateY(30vh) translateX(30px) rotate(15deg);
+                opacity: 0.9;
+            }
+            60% {
+                transform: translateY(65vh) translateX(-20px) rotate(-10deg);
+                opacity: 0.7;
+            }
+            85% {
+                transform: translateY(90vh) translateX(15px) rotate(8deg);
+                opacity: 0.35;
+            }
+            100% {
+                transform: translateY(105vh) translateX(-10px) rotate(-5deg);
+                opacity: 0;
+            }
+        }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 768px) {
+            .items-layer .item {
+                width: 17%;
+                border-radius: 14px;
+                box-shadow: 0 0 22px 10px var(--glow-color), 0 0 38px 6px rgba(255, 235, 180, 0.3);
+            }
+            .item-chest {
+                bottom: 5%;
+                left: 3%;
+            }
+            .item-frame {
+                top: 5%;
+                right: 3%;
+            }
+            .item-books {
+                bottom: 7%;
+            }
+            .item-lamp {
+                top: 4%;
+                left: 3%;
+            }
+            .item-mirror {
+                bottom: 5%;
+                right: 3%;
+            }
+            .item-letter {
+                top: 16%;
+            }
+            .item-key {
+                top: 44%;
+                left: 2%;
+            }
+            .item-hatbox {
+                top: 42%;
+                right: 2%;
+            }
+            .card-scene {
+                width: min(360px, 92vw);
+                height: min(380px, 58vh);
+            }
+            .card-back {
+                padding: 16px 16px;
+                gap: 7px;
+            }
+            .card-back input {
+                font-size: 16px;
+                padding: 9px 10px;
+            }
+            .card-back button {
+                font-size: 15px;
+                padding: 10px 16px;
+                min-height: 44px;
+            }
+            .final-images {
+                flex-direction: column;
+                gap: 18px;
+            }
+            .final-images img.recipe-card-img {
+                width: min(68%, 320px);
+            }
+            .final-images img.pie-img {
+                width: min(46%, 210px);
+            }
+            .final-input-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .final-input-row input {
+                min-width: 160px;
+                font-size: 18px;
+            }
+            .letter-slot {
+                width: clamp(28px, 7vw, 40px);
+                height: clamp(32px, 7.5vw, 46px);
+                font-size: clamp(15px, 4vw, 22px);
+            }
+        }
+        @media (max-width: 400px) {
+            .items-layer .item {
+                width: 20%;
+                border-radius: 12px;
+            }
+            .card-scene {
+                width: 94vw;
+                height: min(400px, 55vh);
+            }
+            .card-back input {
+                font-size: 15px;
+            }
+            .card-front .verb-display {
+                font-size: clamp(28px, 8vw, 42px);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Background -->
+    <div class="bg-layer">
+        <img src="attic.png" alt="Attic" class="bg-image" id="bgImage">
+    </div>
+
+    <!-- Clickable Items -->
+    <div class="items-layer" id="itemsLayer">
+        <img src="chest.png" alt="Chest" class="item item-chest" data-item="chest" id="itemChest">
+        <img src="frame.png" alt="Frame" class="item item-frame" data-item="frame" id="itemFrame">
+        <img src="books.png" alt="Books" class="item item-books" data-item="books" id="itemBooks">
+        <img src="lamp.png" alt="Lamp" class="item item-lamp" data-item="lamp" id="itemLamp">
+        <img src="mirror.png" alt="Mirror" class="item item-mirror" data-item="mirror" id="itemMirror">
+        <img src="letter.png" alt="Letter" class="item item-letter" data-item="letter" id="itemLetter">
+        <img src="key.png" alt="Key" class="item item-key" data-item="key" id="itemKey">
+        <img src="hatbox.png" alt="Hatbox" class="item item-hatbox" data-item="hatbox" id="itemHatbox">
+    </div>
+
+    <!-- Letters bar -->
+    <div class="letters-bar" id="lettersBar">
+        <div class="letter-slot underscore" id="slot0">_</div>
+        <div class="letter-slot underscore" id="slot1">_</div>
+        <div class="letter-slot underscore" id="slot2">_</div>
+        <div class="letter-slot underscore" id="slot3">_</div>
+        <div class="letter-slot underscore" id="slot4">_</div>
+        <div class="letter-slot underscore" id="slot5">_</div>
+        <div class="letter-slot underscore" id="slot6">_</div>
+        <div class="letter-slot underscore" id="slot7">_</div>
+    </div>
+
+    <!-- Card overlay -->
+    <div class="card-overlay" id="cardOverlay">
+        <div class="card-scene" id="cardScene">
+            <div class="card-inner" id="cardInner">
+                <!-- Front face -->
+                <div class="card-face card-front" id="cardFront">
+                    <div class="tape-strip"></div>
+                    <span class="verb-display" id="verbDisplay">bring</span>
+                    <span class="flip-hint">↻ tap to flip</span>
+                </div>
+                <!-- Back face -->
+                <div class="card-face card-back" id="cardBack">
+                    <button class="btn-close-card" id="btnCloseCard" title="Close">✕</button>
+                    <div class="input-group">
+                        <label for="inpInfinitive">Infinitive</label>
+                        <input type="text" id="inpInfinitive" placeholder="e.g. bring" autocomplete="off">
+                    </div>
+                    <div class="input-group">
+                        <label for="inpPastSimple">Past Simple</label>
+                        <input type="text" id="inpPastSimple" placeholder="e.g. brought" autocomplete="off">
+                    </div>
+                    <div class="input-group">
+                        <label for="inpPastParticiple">Past Participle</label>
+                        <input type="text" id="inpPastParticiple" placeholder="e.g. brought" autocomplete="off">
+                    </div>
+                    <span class="feedback-msg" id="feedbackMsg"></span>
+                    <div class="btn-row">
+                        <button class="btn-flip-back" id="btnFlipBack">↩ See Verb</button>
+                        <button class="btn-check" id="btnCheck">✓ Check</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Final treasure overlay -->
+    <div class="final-overlay" id="finalOverlay">
+        <div class="final-images" id="finalImages">
+            <img src="recipe_card.png" alt="Recipe Card" class="recipe-card-img" id="recipeCardImg">
+            <img src="pie.png" alt="Pie" class="pie-img" id="pieImg">
+        </div>
+        <p class="final-message" id="finalMessage">You found Grandma's secret recipe! Well done!</p>
+    </div>
+
+    <!-- Final code input (shown when all 8 letters collected, before treasure) -->
+    <div class="card-overlay" id="codeOverlay" style="z-index:85;">
+        <div style="background:#fdf6ec;border:4px solid #c4a882;border-radius:18px;padding:28px 24px;box-shadow:0 12px 40px rgba(0,0,0,0.5);display:flex;flex-direction:column;align-items:center;gap:14px;width:min(380px,88vw);">
+            <span style="font-size:20px;font-weight:bold;color:#3e2f1c;text-align:center;">🔑 Enter the secret word:</span>
+            <div class="final-input-row" style="margin-top:0;animation:none;">
+                <input type="text" id="inpFinalWord" placeholder="________" autocomplete="off" style="letter-spacing:4px;">
+                <button id="btnUnlock">Unlock</button>
+            </div>
+            <span class="feedback-msg" id="finalFeedback" style="min-height:20px;"></span>
+        </div>
+    </div>
+
+    <!-- Hearts container -->
+    <div class="hearts-container" id="heartsContainer"></div>
+
+    <script>
+        (function() {
+            // ============ GAME STATE ============
+            const letterSequence = ['T', 'R', 'E', 'A', 'S', 'U', 'R', 'E'];
+            const itemsData = {
+                chest: { verb: 'bring', forms: ['bring', 'brought', 'brought'] },
+                frame: { verb: 'take', forms: ['take', 'took', 'taken'] },
+                books: { verb: 'write', forms: ['write', 'wrote', 'written'] },
+                lamp: { verb: 'light', forms: ['light', 'lit', 'lit'] },
+                mirror: { verb: 'see', forms: ['see', 'saw', 'seen'] },
+                letter: { verb: 'send', forms: ['send', 'sent', 'sent'] },
+                key: { verb: 'find', forms: ['find', 'found', 'found'] },
+                hatbox: { verb: 'wear', forms: ['wear', 'wore', 'worn'] },
+            };
+
+            let solvedItems = new Set();
+            let lettersCollected = 0;
+            let currentItem = null;
+            let isFlipped = false;
+            let treasureUnlocked = false;
+            let cardVisible = false;
+
+            // ============ DOM REFS ============
+            const cardOverlay = document.getElementById('cardOverlay');
+            const cardInner = document.getElementById('cardInner');
+            const cardFront = document.getElementById('cardFront');
+            const cardBack = document.getElementById('cardBack');
+            const verbDisplay = document.getElementById('verbDisplay');
+            const inpInfinitive = document.getElementById('inpInfinitive');
+            const inpPastSimple = document.getElementById('inpPastSimple');
+            const inpPastParticiple = document.getElementById('inpPastParticiple');
+            const feedbackMsg = document.getElementById('feedbackMsg');
+            const btnCheck = document.getElementById('btnCheck');
+            const btnFlipBack = document.getElementById('btnFlipBack');
+            const btnCloseCard = document.getElementById('btnCloseCard');
+            const finalOverlay = document.getElementById('finalOverlay');
+            const codeOverlay = document.getElementById('codeOverlay');
+            const inpFinalWord = document.getElementById('inpFinalWord');
+            const btnUnlock = document.getElementById('btnUnlock');
+            const finalFeedback = document.getElementById('finalFeedback');
+            const heartsContainer = document.getElementById('heartsContainer');
+            const itemsLayer = document.getElementById('itemsLayer');
+            const finalImages = document.getElementById('finalImages');
+            const finalMessage = document.getElementById('finalMessage');
+            const recipeCardImg = document.getElementById('recipeCardImg');
+            const pieImg = document.getElementById('pieImg');
+
+            // ============ AUDIO ENGINE ============
+            let audioCtx = null;
+
+            function getAudioCtx() {
+                if (!audioCtx) {
+                    audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                return audioCtx;
+            }
+
+            function playDing() {
+                try {
+                    const ctx = getAudioCtx();
+                    const now = ctx.currentTime;
+                    // Bell-like ding
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(880, now);
+                    osc.frequency.exponentialRampToValueAtTime(660, now + 0.15);
+                    gain.gain.setValueAtTime(0.55, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.4);
+                    // Add a harmonic
+                    const osc2 = ctx.createOscillator();
+                    const gain2 = ctx.createGain();
+                    osc2.type = 'sine';
+                    osc2.frequency.setValueAtTime(1320, now);
+                    osc2.frequency.exponentialRampToValueAtTime(990, now + 0.12);
+                    gain2.gain.setValueAtTime(0.25, now);
+                    gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+                    osc2.connect(gain2);
+                    gain2.connect(ctx.destination);
+                    osc2.start(now);
+                    osc2.stop(now + 0.35);
+                } catch (e) {
+                    // Silently fail
+                }
+            }
+
+            function playCorrectPeek() {
+                try {
+                    const ctx = getAudioCtx();
+                    const now = ctx.currentTime;
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(1047, now);
+                    osc.frequency.setValueAtTime(1319, now + 0.08);
+                    gain.gain.setValueAtTime(0.5, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.35);
+                } catch (e) {}
+            }
+
+            function playIncorrectLow() {
+                try {
+                    const ctx = getAudioCtx();
+                    const now = ctx.currentTime;
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(220, now);
+                    gain.gain.setValueAtTime(0.4, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.5);
+                } catch (e) {}
+            }
+
+            function playVictoryMelody() {
+                try {
+                    const ctx = getAudioCtx();
+                    const now = ctx.currentTime;
+                    const notes = [
+                        { freq: 523.25, time: 0 },
+                        { freq: 659.25, time: 0.18 },
+                        { freq: 783.99, time: 0.36 },
+                    ];
+                    notes.forEach(n => {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(n.freq, now + n.time);
+                        gain.gain.setValueAtTime(0.45, now + n.time);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + n.time + 0.4);
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.start(now + n.time);
+                        osc.stop(now + n.time + 0.45);
+                    });
+                } catch (e) {}
+            }
+
+            // ============ CARD LOGIC ============
+            function showCard(itemName) {
+                if (solvedItems.has(itemName)) return;
+                if (treasureUnlocked) return;
+                currentItem = itemName;
+                isFlipped = false;
+                cardInner.classList.remove('flipped');
+                verbDisplay.textContent = itemsData[itemName].verb;
+                inpInfinitive.value = '';
+                inpPastSimple.value = '';
+                inpPastParticiple.value = '';
+                feedbackMsg.textContent = '';
+                feedbackMsg.className = 'feedback-msg';
+                cardOverlay.classList.add('active');
+                cardVisible = true;
+                // Small delay then focus first input after flip
+                setTimeout(() => {
+                    if (!isFlipped && cardVisible && currentItem === itemName) {
+                        // Card is showing front; user needs to flip
+                    }
+                }, 100);
+                playDing();
+            }
+
+            function hideCard() {
+                cardOverlay.classList.remove('active');
+                cardVisible = false;
+                currentItem = null;
+                isFlipped = false;
+                cardInner.classList.remove('flipped');
+                feedbackMsg.textContent = '';
+                feedbackMsg.className = 'feedback-msg';
+                inpInfinitive.value = '';
+                inpPastSimple.value = '';
+                inpPastParticiple.value = '';
+            }
+
+            function flipCard() {
+                if (!cardVisible) return;
+                isFlipped = !isFlipped;
+                if (isFlipped) {
+                    cardInner.classList.add('flipped');
+                    feedbackMsg.textContent = '';
+                    feedbackMsg.className = 'feedback-msg';
+                    inpInfinitive.value = '';
+                    inpPastSimple.value = '';
+                    inpPastParticiple.value = '';
+                    setTimeout(() => inpInfinitive.focus(), 400);
+                } else {
+                    cardInner.classList.remove('flipped');
+                }
+            }
+
+            function flipToBack() {
+                if (!cardVisible || isFlipped) return;
+                isFlipped = true;
+                cardInner.classList.add('flipped');
+                feedbackMsg.textContent = '';
+                feedbackMsg.className = 'feedback-msg';
+                inpInfinitive.value = '';
+                inpPastSimple.value = '';
+                inpPastParticiple.value = '';
+                setTimeout(() => inpInfinitive.focus(), 400);
+            }
+
+            function flipToFront() {
+                if (!cardVisible || !isFlipped) return;
+                isFlipped = false;
+                cardInner.classList.remove('flipped');
+            }
+
+            function checkAnswer() {
+                if (!cardVisible || !currentItem || !isFlipped) return;
+                const data = itemsData[currentItem];
+                const userInfinitive = inpInfinitive.value.trim().toLowerCase();
+                const userPastSimple = inpPastSimple.value.trim().toLowerCase();
+                const userPastParticiple = inpPastParticiple.value.trim().toLowerCase();
+
+                const correctInfinitive = data.forms[0].toLowerCase();
+                const correctPastSimple = data.forms[1].toLowerCase();
+                const correctPastParticiple = data.forms[2].toLowerCase();
+
+                if (
+                    userInfinitive === correctInfinitive &&
+                    userPastSimple === correctPastSimple &&
+                    userPastParticiple === correctPastParticiple
+                ) {
+                    // Correct!
+                    feedbackMsg.textContent = '✓ Correct!';
+                    feedbackMsg.className = 'feedback-msg correct';
+                    playCorrectPeek();
+                    // Mark item as solved
+                    solvedItems.add(currentItem);
+                    const itemEl = document.querySelector(`.item[data-item="${currentItem}"]`);
+                    if (itemEl) {
+                        itemEl.classList.add('solved');
+                    }
+                    // Award letter
+                    if (lettersCollected < 8) {
+                        const letter = letterSequence[lettersCollected];
+                        const slotEl = document.getElementById('slot' + lettersCollected);
+                        if (slotEl) {
+                            slotEl.textContent = letter;
+                            slotEl.classList.remove('underscore');
+                            slotEl.classList.add('collected');
+                        }
+                        lettersCollected++;
+                    }
+                    // Hide card after short delay
+                    const solvedItem = currentItem;
+                    setTimeout(() => {
+                        hideCard();
+                        // Check if all letters collected
+                        if (lettersCollected >= 8 && !treasureUnlocked) {
+                            showCodeInput();
+                        }
+                    }, 800);
+                } else {
+                    // Incorrect
+                    feedbackMsg.textContent = '✗ Try again!';
+                    feedbackMsg.className = 'feedback-msg incorrect';
+                    playIncorrectLow();
+                    inpInfinitive.value = '';
+                    inpPastSimple.value = '';
+                    inpPastParticiple.value = '';
+                    setTimeout(() => inpInfinitive.focus(), 300);
+                }
+            }
+
+            // ============ CODE INPUT (when all 8 letters collected) ============
+            function showCodeInput() {
+                codeOverlay.classList.add('active');
+                inpFinalWord.value = '';
+                finalFeedback.textContent = '';
+                finalFeedback.className = 'feedback-msg';
+                setTimeout(() => inpFinalWord.focus(), 400);
+            }
+
+            function hideCodeInput() {
+                codeOverlay.classList.remove('active');
+                inpFinalWord.value = '';
+                finalFeedback.textContent = '';
+                finalFeedback.className = 'feedback-msg';
+            }
+
+            function attemptUnlock() {
+                const userWord = inpFinalWord.value.trim().toUpperCase();
+                if (userWord === 'TREASURE') {
+                    hideCodeInput();
+                    unlockTreasure();
+                } else {
+                    finalFeedback.textContent = '✗ Wrong word. Try again!';
+                    finalFeedback.className = 'feedback-msg incorrect';
+                    playIncorrectLow();
+                    inpFinalWord.value = '';
+                    setTimeout(() => inpFinalWord.focus(), 300);
+                }
+            }
+
+            function unlockTreasure() {
+                treasureUnlocked = true;
+                hideCard();
+                hideCodeInput();
+                // Show final overlay
+                finalOverlay.classList.add('active');
+                finalMessage.textContent = 'You found Grandma\'s secret recipe! Well done!';
+                // Ensure images are visible
+                recipeCardImg.style.display = '';
+                pieImg.style.display = '';
+                finalImages.style.display = '';
+                // Start hearts
+                spawnHearts();
+                // Play melody
+                playVictoryMelody();
+            }
+
+            // ============ HEARTS ANIMATION ============
+            function spawnHearts() {
+                const heartEmojis = ['❤️', '🧡', '💛', '💖', '💝', '💕', '♥️', '💗'];
+                const count = 35;
+                for (let i = 0; i < count; i++) {
+                    const heart = document.createElement('span');
+                    heart.className = 'heart';
+                    heart.textContent = heartEmojis[Math.floor(Math.random() * heartEmojis.length)];
+                    heart.style.left = Math.random() * 95 + '%';
+                    heart.style.animationDuration = (2.5 + Math.random() * 4.5) + 's';
+                    heart.style.animationDelay = Math.random() * 3 + 's';
+                    heart.style.fontSize = (18 + Math.random() * 32) + 'px';
+                    heartsContainer.appendChild(heart);
+                    // Remove heart after animation
+                    const totalDuration = parseFloat(heart.style.animationDuration) + parseFloat(heart.style
+                        .animationDelay);
+                    setTimeout(() => {
+                        if (heart.parentNode) heart.parentNode.removeChild(heart);
+                    }, totalDuration * 1000 + 500);
+                }
+            }
+
+            // ============ EVENT LISTENERS ============
+            // Item clicks
+            const allItemEls = document.querySelectorAll('.items-layer .item');
+            allItemEls.forEach(el => {
+                el.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const itemName = el.getAttribute('data-item');
+                    if (solvedItems.has(itemName)) return;
+                    if (treasureUnlocked) return;
+                    if (cardVisible && currentItem === itemName && !isFlipped) {
+                        // Same item clicked while card showing front → flip to back
+                        flipToBack();
+                        return;
+                    }
+                    if (cardVisible && currentItem === itemName && isFlipped) {
+                        // Already showing this item's back → do nothing special
+                        return;
+                    }
+                    // Show card for new item
+                    showCard(itemName);
+                });
+            });
+
+            // Card front click → flip to back
+            cardFront.addEventListener('click', (e) => {
+                if (cardVisible && !isFlipped) {
+                    e.stopPropagation();
+                    flipToBack();
+                }
+            });
+
+            // Card back click on the card itself (not buttons/inputs) → do nothing special
+            cardBack.addEventListener('click', (e) => {
+                // Don't flip on back click; only buttons handle actions
+                e.stopPropagation();
+            });
+
+            // Flip back button
+            btnFlipBack.addEventListener('click', (e) => {
+                e.stopPropagation();
+                flipToFront();
+            });
+
+            // Close button
+            btnCloseCard.addEventListener('click', (e) => {
+                e.stopPropagation();
+                hideCard();
+            });
+
+            // Check button
+            btnCheck.addEventListener('click', (e) => {
+                e.stopPropagation();
+                checkAnswer();
+            });
+
+            // Keyboard: Enter on inputs triggers check
+            [inpInfinitive, inpPastSimple, inpPastParticiple].forEach(inp => {
+                inp.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        checkAnswer();
+                    }
+                });
+            });
+
+            // Close card when clicking overlay background
+            cardOverlay.addEventListener('click', (e) => {
+                if (e.target === cardOverlay) {
+                    hideCard();
+                }
+            });
+
+            // Code overlay background click → close
+            codeOverlay.addEventListener('click', (e) => {
+                if (e.target === codeOverlay) {
+                    hideCodeInput();
+                }
+            });
+
+            // Unlock button
+            btnUnlock.addEventListener('click', (e) => {
+                e.stopPropagation();
+                attemptUnlock();
+            });
+
+            // Enter on final word input
+            inpFinalWord.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    attemptUnlock();
+                }
+            });
+
+            // Final overlay click (to dismiss? keep it visible)
+            finalOverlay.addEventListener('click', (e) => {
+                if (e.target === finalOverlay && treasureUnlocked) {
+                    // Re-spawn hearts on click
+                    spawnHearts();
+                    playVictoryMelody();
+                }
+            });
+
+            // Escape key to close card
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    if (cardVisible) {
+                        hideCard();
+                    }
+                    if (codeOverlay.classList.contains('active') && !treasureUnlocked) {
+                        hideCodeInput();
+                    }
+                }
+            });
+
+            // ============ INITIALIZATION ============
+            // Hide code overlay and final overlay initially
+            codeOverlay.classList.remove('active');
+            finalOverlay.classList.remove('active');
+            cardOverlay.classList.remove('active');
+            // Ensure all letter slots show underscores
+            for (let i = 0; i < 8; i++) {
+                const slot = document.getElementById('slot' + i);
+                if (slot) {
+                    slot.textContent = '_';
+                    slot.classList.add('underscore');
+                    slot.classList.remove('collected');
+                }
+            }
+
+            // Handle image loading errors gracefully
+            document.querySelectorAll('img').forEach(img => {
+                img.addEventListener('error', () => {
+                    img.style.display = 'none';
+                    console.warn('Image not found:', img.getAttribute('src'));
+                });
+            });
+
+            console.log('🏠 Grandma\'s Attic Quest ready!');
+            console.log('📦 Items:', Object.keys(itemsData).length);
+            console.log('🔤 Secret word: T R E A S U R E');
+            console.log('👆 Click the glowing items to start!');
+        })();
+    </script>
+</body>
+</html>
