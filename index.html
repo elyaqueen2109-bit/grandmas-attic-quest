@@ -6,14 +6,14 @@
     <title>Grandma's Attic Quest</title>
     <style>
         :root {
-            --craft-bg: #f7efe0;
+            --craft-bg: #faf3e6;
             --craft-border: #c4a882;
             --craft-text: #3e2f1c;
             --gold: #c8963e;
             --gold-light: #e0c278;
             --warm-shadow: #8b6f4e;
-            --card-front: #faf3e6;
-            --card-back: #fdf6ec;
+            --card-front: #fdf7ed;
+            --card-back: #fefaf3;
             --overlay-dark: rgba(20, 12, 4, 0.65);
             --glow-color: rgba(255, 245, 210, 0.7);
         }
@@ -29,7 +29,7 @@
             height: 100vh;
             height: 100dvh;
             overflow: hidden;
-            font-family: 'Georgia', 'Times New Roman', 'Palatino Linotype', serif;
+            font-family: 'Georgia', 'Times New Roman', 'Palatino Linotype', 'Book Antiqua', serif;
             background: #2a1f14;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
@@ -37,7 +37,7 @@
             position: relative;
         }
 
-        /* ========== BACKGROUND ========== */
+        /* ========== BACKGROUND LAYER ========== */
         .bg-layer {
             position: fixed;
             inset: 0;
@@ -46,12 +46,16 @@
             align-items: center;
             justify-content: center;
             background: #2a1f14;
+            transition: filter 0.8s ease;
         }
         .bg-layer img {
             width: 100%;
             height: 100%;
             object-fit: cover;
             display: block;
+        }
+        .bg-layer.dimmed {
+            filter: brightness(0.35);
         }
 
         /* ========== ITEMS LAYER ========== */
@@ -71,8 +75,8 @@
             border-radius: 18px;
             box-shadow: 0 0 28px 14px var(--glow-color), 0 0 50px 8px rgba(255, 235, 180, 0.35);
             animation: sway 4s ease-in-out infinite;
-            transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.5s ease;
-            will-change: transform;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.6s ease;
+            will-change: transform, opacity;
         }
         .items-layer .item:hover {
             transform: scale(1.12);
@@ -82,15 +86,12 @@
         .items-layer .item.solved {
             opacity: 0;
             pointer-events: none;
-            transform: scale(0.5);
+            transform: scale(0.4);
             box-shadow: none;
             transition: opacity 0.6s ease, transform 0.6s ease, box-shadow 0.6s ease;
         }
-        .items-layer .item.no-sway {
-            animation: none;
-        }
 
-        /* Item positions */
+        /* Item positions — evenly spread across the attic */
         .item-chest {
             bottom: 6%;
             left: 5%;
@@ -104,8 +105,8 @@
         .item-books {
             bottom: 8%;
             left: 50%;
-            transform: translateX(-50%);
             animation-delay: 1s;
+            animation-name: sway-center;
         }
         .item-lamp {
             top: 6%;
@@ -118,26 +119,23 @@
             animation-delay: 2s;
         }
         .item-letter {
-            top: 18%;
+            top: 16%;
             left: 50%;
-            transform: translateX(-50%);
             animation-delay: 2.5s;
+            animation-name: sway-center;
         }
         .item-key {
-            top: 45%;
+            top: 44%;
             left: 4%;
             animation-delay: 3s;
         }
         .item-hatbox {
-            top: 43%;
+            top: 42%;
             right: 4%;
             animation-delay: 3.5s;
         }
-        .item-books:hover,
-        .item-letter:hover {
-            transform: translateX(-50%) scale(1.12);
-        }
 
+        /* Sway animations */
         @keyframes sway {
             0%,
             100% {
@@ -147,22 +145,7 @@
                 transform: rotate(2.5deg);
             }
         }
-        .item-books {
-            animation-name: sway-books;
-        }
-        .item-letter {
-            animation-name: sway-letter;
-        }
-        @keyframes sway-books {
-            0%,
-            100% {
-                transform: translateX(-50%) rotate(-2.5deg);
-            }
-            50% {
-                transform: translateX(-50%) rotate(2.5deg);
-            }
-        }
-        @keyframes sway-letter {
+        @keyframes sway-center {
             0%,
             100% {
                 transform: translateX(-50%) rotate(-2deg);
@@ -170,6 +153,10 @@
             50% {
                 transform: translateX(-50%) rotate(2deg);
             }
+        }
+        .item-books:hover,
+        .item-letter:hover {
+            transform: translateX(-50%) scale(1.12) !important;
         }
 
         /* ========== LETTERS BAR ========== */
@@ -238,6 +225,7 @@
             pointer-events: none;
             opacity: 0;
             transition: opacity 0.35s ease;
+            background: rgba(0, 0, 0, 0.35);
         }
         .card-overlay.active {
             opacity: 1;
@@ -245,8 +233,8 @@
         }
         .card-scene {
             perspective: 900px;
-            width: min(420px, 88vw);
-            height: min(340px, 62vh);
+            width: min(440px, 90vw);
+            height: min(370px, 60vh);
             position: relative;
         }
         .card-inner {
@@ -266,7 +254,7 @@
             backface-visibility: hidden;
             -webkit-backface-visibility: hidden;
             border-radius: 18px;
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 14px 44px rgba(0, 0, 0, 0.5), 0 3px 10px rgba(0, 0, 0, 0.25);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -278,31 +266,30 @@
             background: var(--card-front);
             border: 4px solid var(--craft-border);
             z-index: 2;
-            background-image:
-                radial-gradient(ellipse at 20% 20%, rgba(255, 255, 240, 0.5) 0%, transparent 60%),
-                radial-gradient(ellipse at 80% 70%, rgba(210, 180, 140, 0.25) 0%, transparent 55%),
-                repeating-linear-gradient(0deg, transparent, transparent 28px, rgba(180, 150, 110, 0.08) 28px, rgba(180, 150, 110, 0.08) 29px);
+            background-image: radial-gradient(ellipse at 20% 20%, rgba(255, 255, 240, 0.5) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 70%, rgba(210, 180, 140, 0.2) 0%, transparent 55%),
+                repeating-linear-gradient(0deg, transparent, transparent 28px, rgba(180, 150, 110, 0.07) 28px, rgba(180, 150, 110, 0.07) 29px);
         }
-        .card-front .verb-display {
-            font-size: clamp(36px, 7vw, 56px);
+        .card-front .adj-display {
+            font-size: clamp(40px, 8vw, 60px);
             font-weight: bold;
             color: var(--craft-text);
             text-align: center;
             letter-spacing: 1px;
-            margin-bottom: 8px;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+            margin-bottom: 6px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.08);
         }
         .card-front .flip-hint {
             font-size: 15px;
             color: #8b7355;
-            letter-spacing: 0.5px;
-            margin-top: 6px;
-            animation: pulse-hint 2s ease-in-out infinite;
+            letter-spacing: 0.4px;
+            margin-top: 8px;
+            animation: pulse-hint 2.2s ease-in-out infinite;
         }
         @keyframes pulse-hint {
             0%,
             100% {
-                opacity: 0.55;
+                opacity: 0.5;
             }
             50% {
                 opacity: 1;
@@ -310,15 +297,15 @@
         }
         .card-front .tape-strip {
             position: absolute;
-            top: -6px;
+            top: -7px;
             left: 50%;
             transform: translateX(-50%) rotate(-2deg);
-            width: 70px;
+            width: 74px;
             height: 22px;
             background: rgba(255, 255, 220, 0.7);
             border: 1px solid #d4c0a0;
             border-radius: 3px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
         }
 
         /* Back face */
@@ -327,31 +314,29 @@
             border: 4px solid var(--craft-border);
             transform: rotateY(180deg);
             z-index: 1;
-            padding: 20px 24px;
-            gap: 10px;
-            background-image:
-                radial-gradient(ellipse at 70% 30%, rgba(255, 255, 240, 0.45) 0%, transparent 55%),
-                radial-gradient(ellipse at 25% 75%, rgba(210, 180, 140, 0.2) 0%, transparent 50%),
-                repeating-linear-gradient(0deg, transparent, transparent 26px, rgba(180, 150, 110, 0.06) 26px, rgba(180, 150, 110, 0.06) 27px);
+            padding: 22px 26px;
+            gap: 9px;
+            background-image: radial-gradient(ellipse at 70% 30%, rgba(255, 255, 240, 0.4) 0%, transparent 55%),
+                radial-gradient(ellipse at 25% 75%, rgba(210, 180, 140, 0.18) 0%, transparent 50%),
+                repeating-linear-gradient(0deg, transparent, transparent 26px, rgba(180, 150, 110, 0.05) 26px, rgba(180, 150, 110, 0.05) 27px);
         }
         .card-back .input-group {
             width: 100%;
             display: flex;
             flex-direction: column;
-            gap: 5px;
+            gap: 4px;
         }
         .card-back label {
-            font-size: 14px;
+            font-size: 13px;
             font-weight: bold;
             color: #5a3e28;
-            letter-spacing: 0.4px;
+            letter-spacing: 0.5px;
             text-transform: uppercase;
-            font-size: 12px;
             margin-bottom: 1px;
         }
         .card-back input {
             width: 100%;
-            padding: 10px 14px;
+            padding: 11px 14px;
             border: 2px solid #c4a882;
             border-radius: 8px;
             font-size: 17px;
@@ -371,7 +356,7 @@
             display: flex;
             gap: 10px;
             width: 100%;
-            margin-top: 4px;
+            margin-top: 5px;
             flex-wrap: wrap;
             justify-content: center;
         }
@@ -413,7 +398,7 @@
             z-index: 10;
             background: transparent;
             border: none;
-            font-size: 26px;
+            font-size: 28px;
             cursor: pointer;
             color: #8b6f4e;
             width: 40px;
@@ -443,6 +428,92 @@
         }
         .feedback-msg.incorrect {
             color: #b84a3a;
+        }
+
+        /* ========== CODE OVERLAY ========== */
+        .code-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 85;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            background: rgba(0, 0, 0, 0.45);
+        }
+        .code-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .code-dialog {
+            background: #fefaf3;
+            border: 4px solid #c4a882;
+            border-radius: 18px;
+            padding: 28px 24px;
+            box-shadow: 0 14px 44px rgba(0, 0, 0, 0.55);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+            width: min(400px, 90vw);
+            background-image: radial-gradient(ellipse at 30% 30%, rgba(255, 255, 240, 0.4) 0%, transparent 60%),
+                repeating-linear-gradient(0deg, transparent, transparent 26px, rgba(180, 150, 110, 0.05) 26px, rgba(180, 150, 110, 0.05) 27px);
+        }
+        .code-dialog .code-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #3e2f1c;
+            text-align: center;
+            letter-spacing: 0.5px;
+        }
+        .code-dialog .code-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+        .code-dialog input {
+            padding: 12px 18px;
+            font-size: 20px;
+            border-radius: 10px;
+            border: 3px solid #c8963e;
+            background: #fffef7;
+            color: #3e2f1c;
+            text-align: center;
+            letter-spacing: 5px;
+            font-family: 'Georgia', 'Times New Roman', serif;
+            font-weight: bold;
+            min-width: 160px;
+            outline: none;
+            transition: box-shadow 0.3s ease;
+            text-transform: uppercase;
+        }
+        .code-dialog input:focus {
+            box-shadow: 0 0 0 6px rgba(200, 150, 60, 0.3);
+        }
+        .code-dialog button {
+            padding: 12px 26px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 25px;
+            border: none;
+            background: #c8963e;
+            color: #fffef7;
+            cursor: pointer;
+            min-height: 48px;
+            font-family: 'Georgia', 'Times New Roman', serif;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+            transition: all 0.25s ease;
+        }
+        .code-dialog button:hover {
+            background: #d4a54e;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
         }
 
         /* ========== FINAL OVERLAY ========== */
@@ -509,54 +580,6 @@
             text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
             animation: float-up 1s ease-out;
             padding: 0 20px;
-        }
-        .final-input-row {
-            z-index: 96;
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            justify-content: center;
-            align-items: center;
-            margin-top: 10px;
-            animation: float-up 0.8s ease-out;
-        }
-        .final-input-row input {
-            padding: 12px 18px;
-            font-size: 20px;
-            border-radius: 10px;
-            border: 3px solid #c8963e;
-            background: #fffef7;
-            color: #3e2f1c;
-            text-align: center;
-            letter-spacing: 3px;
-            font-family: 'Georgia', 'Times New Roman', serif;
-            font-weight: bold;
-            min-width: 180px;
-            outline: none;
-            transition: box-shadow 0.3s ease;
-        }
-        .final-input-row input:focus {
-            box-shadow: 0 0 0 6px rgba(200, 150, 60, 0.3);
-        }
-        .final-input-row button {
-            padding: 12px 26px;
-            font-size: 18px;
-            font-weight: bold;
-            border-radius: 25px;
-            border: none;
-            background: #c8963e;
-            color: #fffef7;
-            cursor: pointer;
-            min-height: 48px;
-            font-family: 'Georgia', 'Times New Roman', serif;
-            letter-spacing: 0.5px;
-            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
-            transition: all 0.25s ease;
-        }
-        .final-input-row button:hover {
-            background: #d4a54e;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
         }
 
         /* ========== HEARTS ========== */
@@ -626,19 +649,19 @@
                 right: 3%;
             }
             .item-letter {
-                top: 16%;
+                top: 14%;
             }
             .item-key {
-                top: 44%;
+                top: 43%;
                 left: 2%;
             }
             .item-hatbox {
-                top: 42%;
+                top: 41%;
                 right: 2%;
             }
             .card-scene {
-                width: min(360px, 92vw);
-                height: min(380px, 58vh);
+                width: min(370px, 94vw);
+                height: min(400px, 56vh);
             }
             .card-back {
                 padding: 16px 16px;
@@ -663,12 +686,12 @@
             .final-images img.pie-img {
                 width: min(46%, 210px);
             }
-            .final-input-row {
+            .code-dialog .code-row {
                 flex-direction: column;
                 gap: 10px;
             }
-            .final-input-row input {
-                min-width: 160px;
+            .code-dialog input {
+                min-width: 140px;
                 font-size: 18px;
             }
             .letter-slot {
@@ -683,26 +706,26 @@
                 border-radius: 12px;
             }
             .card-scene {
-                width: 94vw;
-                height: min(400px, 55vh);
+                width: 96vw;
+                height: min(420px, 54vh);
             }
             .card-back input {
                 font-size: 15px;
             }
-            .card-front .verb-display {
-                font-size: clamp(28px, 8vw, 42px);
+            .card-front .adj-display {
+                font-size: clamp(32px, 9vw, 46px);
             }
         }
     </style>
 </head>
 <body>
 
-    <!-- Background -->
-    <div class="bg-layer">
-        <img src="attic.png" alt="Attic" class="bg-image" id="bgImage">
+    <!-- ==================== BACKGROUND ==================== -->
+    <div class="bg-layer" id="bgLayer">
+        <img src="attic.png" alt="Attic" id="bgImage">
     </div>
 
-    <!-- Clickable Items -->
+    <!-- ==================== CLICKABLE ITEMS ==================== -->
     <div class="items-layer" id="itemsLayer">
         <img src="chest.png" alt="Chest" class="item item-chest" data-item="chest" id="itemChest">
         <img src="frame.png" alt="Frame" class="item item-frame" data-item="frame" id="itemFrame">
@@ -714,7 +737,7 @@
         <img src="hatbox.png" alt="Hatbox" class="item item-hatbox" data-item="hatbox" id="itemHatbox">
     </div>
 
-    <!-- Letters bar -->
+    <!-- ==================== LETTERS BAR ==================== -->
     <div class="letters-bar" id="lettersBar">
         <div class="letter-slot underscore" id="slot0">_</div>
         <div class="letter-slot underscore" id="slot1">_</div>
@@ -726,34 +749,34 @@
         <div class="letter-slot underscore" id="slot7">_</div>
     </div>
 
-    <!-- Card overlay -->
+    <!-- ==================== CARD OVERLAY ==================== -->
     <div class="card-overlay" id="cardOverlay">
         <div class="card-scene" id="cardScene">
             <div class="card-inner" id="cardInner">
                 <!-- Front face -->
                 <div class="card-face card-front" id="cardFront">
                     <div class="tape-strip"></div>
-                    <span class="verb-display" id="verbDisplay">bring</span>
+                    <span class="adj-display" id="adjDisplay">tall</span>
                     <span class="flip-hint">↻ tap to flip</span>
                 </div>
                 <!-- Back face -->
                 <div class="card-face card-back" id="cardBack">
                     <button class="btn-close-card" id="btnCloseCard" title="Close">✕</button>
                     <div class="input-group">
-                        <label for="inpInfinitive">Infinitive</label>
-                        <input type="text" id="inpInfinitive" placeholder="e.g. bring" autocomplete="off">
+                        <label for="inpAdjective">Adjective</label>
+                        <input type="text" id="inpAdjective" placeholder="e.g. tall" autocomplete="off">
                     </div>
                     <div class="input-group">
-                        <label for="inpPastSimple">Past Simple</label>
-                        <input type="text" id="inpPastSimple" placeholder="e.g. brought" autocomplete="off">
+                        <label for="inpComparative">Comparative</label>
+                        <input type="text" id="inpComparative" placeholder="e.g. taller" autocomplete="off">
                     </div>
                     <div class="input-group">
-                        <label for="inpPastParticiple">Past Participle</label>
-                        <input type="text" id="inpPastParticiple" placeholder="e.g. brought" autocomplete="off">
+                        <label for="inpSuperlative">Superlative</label>
+                        <input type="text" id="inpSuperlative" placeholder="e.g. the tallest" autocomplete="off">
                     </div>
                     <span class="feedback-msg" id="feedbackMsg"></span>
                     <div class="btn-row">
-                        <button class="btn-flip-back" id="btnFlipBack">↩ See Verb</button>
+                        <button class="btn-flip-back" id="btnFlipBack">↩ See word</button>
                         <button class="btn-check" id="btnCheck">✓ Check</button>
                     </div>
                 </div>
@@ -761,7 +784,19 @@
         </div>
     </div>
 
-    <!-- Final treasure overlay -->
+    <!-- ==================== CODE OVERLAY ==================== -->
+    <div class="code-overlay" id="codeOverlay">
+        <div class="code-dialog">
+            <span class="code-title">🔑 Enter the secret word:</span>
+            <div class="code-row">
+                <input type="text" id="inpFinalWord" placeholder="________" autocomplete="off">
+                <button id="btnUnlock">Unlock</button>
+            </div>
+            <span class="feedback-msg" id="finalFeedback" style="min-height:20px;"></span>
+        </div>
+    </div>
+
+    <!-- ==================== FINAL TREASURE OVERLAY ==================== -->
     <div class="final-overlay" id="finalOverlay">
         <div class="final-images" id="finalImages">
             <img src="recipe_card.png" alt="Recipe Card" class="recipe-card-img" id="recipeCardImg">
@@ -770,19 +805,7 @@
         <p class="final-message" id="finalMessage">You found Grandma's secret recipe! Well done!</p>
     </div>
 
-    <!-- Final code input (shown when all 8 letters collected, before treasure) -->
-    <div class="card-overlay" id="codeOverlay" style="z-index:85;">
-        <div style="background:#fdf6ec;border:4px solid #c4a882;border-radius:18px;padding:28px 24px;box-shadow:0 12px 40px rgba(0,0,0,0.5);display:flex;flex-direction:column;align-items:center;gap:14px;width:min(380px,88vw);">
-            <span style="font-size:20px;font-weight:bold;color:#3e2f1c;text-align:center;">🔑 Enter the secret word:</span>
-            <div class="final-input-row" style="margin-top:0;animation:none;">
-                <input type="text" id="inpFinalWord" placeholder="________" autocomplete="off" style="letter-spacing:4px;">
-                <button id="btnUnlock">Unlock</button>
-            </div>
-            <span class="feedback-msg" id="finalFeedback" style="min-height:20px;"></span>
-        </div>
-    </div>
-
-    <!-- Hearts container -->
+    <!-- ==================== HEARTS CONTAINER ==================== -->
     <div class="hearts-container" id="heartsContainer"></div>
 
     <script>
@@ -790,14 +813,14 @@
             // ============ GAME STATE ============
             const letterSequence = ['T', 'R', 'E', 'A', 'S', 'U', 'R', 'E'];
             const itemsData = {
-                chest: { verb: 'bring', forms: ['bring', 'brought', 'brought'] },
-                frame: { verb: 'take', forms: ['take', 'took', 'taken'] },
-                books: { verb: 'write', forms: ['write', 'wrote', 'written'] },
-                lamp: { verb: 'light', forms: ['light', 'lit', 'lit'] },
-                mirror: { verb: 'see', forms: ['see', 'saw', 'seen'] },
-                letter: { verb: 'send', forms: ['send', 'sent', 'sent'] },
-                key: { verb: 'find', forms: ['find', 'found', 'found'] },
-                hatbox: { verb: 'wear', forms: ['wear', 'wore', 'worn'] },
+                chest: { adjective: 'tall', forms: ['tall', 'taller', 'the tallest'] },
+                frame: { adjective: 'short', forms: ['short', 'shorter', 'the shortest'] },
+                books: { adjective: 'long', forms: ['long', 'longer', 'the longest'] },
+                lamp: { adjective: 'slow', forms: ['slow', 'slower', 'the slowest'] },
+                mirror: { adjective: 'fast', forms: ['fast', 'faster', 'the fastest'] },
+                letter: { adjective: 'cold', forms: ['cold', 'colder', 'the coldest'] },
+                key: { adjective: 'bright', forms: ['bright', 'brighter', 'the brightest'] },
+                hatbox: { adjective: 'warm', forms: ['warm', 'warmer', 'the warmest'] },
             };
 
             let solvedItems = new Set();
@@ -806,31 +829,29 @@
             let isFlipped = false;
             let treasureUnlocked = false;
             let cardVisible = false;
+            let codeVisible = false;
 
             // ============ DOM REFS ============
+            const bgLayer = document.getElementById('bgLayer');
             const cardOverlay = document.getElementById('cardOverlay');
             const cardInner = document.getElementById('cardInner');
             const cardFront = document.getElementById('cardFront');
             const cardBack = document.getElementById('cardBack');
-            const verbDisplay = document.getElementById('verbDisplay');
-            const inpInfinitive = document.getElementById('inpInfinitive');
-            const inpPastSimple = document.getElementById('inpPastSimple');
-            const inpPastParticiple = document.getElementById('inpPastParticiple');
+            const adjDisplay = document.getElementById('adjDisplay');
+            const inpAdjective = document.getElementById('inpAdjective');
+            const inpComparative = document.getElementById('inpComparative');
+            const inpSuperlative = document.getElementById('inpSuperlative');
             const feedbackMsg = document.getElementById('feedbackMsg');
             const btnCheck = document.getElementById('btnCheck');
             const btnFlipBack = document.getElementById('btnFlipBack');
             const btnCloseCard = document.getElementById('btnCloseCard');
-            const finalOverlay = document.getElementById('finalOverlay');
             const codeOverlay = document.getElementById('codeOverlay');
             const inpFinalWord = document.getElementById('inpFinalWord');
             const btnUnlock = document.getElementById('btnUnlock');
             const finalFeedback = document.getElementById('finalFeedback');
+            const finalOverlay = document.getElementById('finalOverlay');
             const heartsContainer = document.getElementById('heartsContainer');
             const itemsLayer = document.getElementById('itemsLayer');
-            const finalImages = document.getElementById('finalImages');
-            const finalMessage = document.getElementById('finalMessage');
-            const recipeCardImg = document.getElementById('recipeCardImg');
-            const pieImg = document.getElementById('pieImg');
 
             // ============ AUDIO ENGINE ============
             let audioCtx = null;
@@ -849,7 +870,6 @@
                 try {
                     const ctx = getAudioCtx();
                     const now = ctx.currentTime;
-                    // Bell-like ding
                     const osc = ctx.createOscillator();
                     const gain = ctx.createGain();
                     osc.type = 'sine';
@@ -861,7 +881,6 @@
                     gain.connect(ctx.destination);
                     osc.start(now);
                     osc.stop(now + 0.4);
-                    // Add a harmonic
                     const osc2 = ctx.createOscillator();
                     const gain2 = ctx.createGain();
                     osc2.type = 'sine';
@@ -873,9 +892,7 @@
                     gain2.connect(ctx.destination);
                     osc2.start(now);
                     osc2.stop(now + 0.35);
-                } catch (e) {
-                    // Silently fail
-                }
+                } catch (e) { /* silent */ }
             }
 
             function playCorrectPeek() {
@@ -941,23 +958,18 @@
             function showCard(itemName) {
                 if (solvedItems.has(itemName)) return;
                 if (treasureUnlocked) return;
+                if (codeVisible) return;
                 currentItem = itemName;
                 isFlipped = false;
                 cardInner.classList.remove('flipped');
-                verbDisplay.textContent = itemsData[itemName].verb;
-                inpInfinitive.value = '';
-                inpPastSimple.value = '';
-                inpPastParticiple.value = '';
+                adjDisplay.textContent = itemsData[itemName].adjective;
+                inpAdjective.value = '';
+                inpComparative.value = '';
+                inpSuperlative.value = '';
                 feedbackMsg.textContent = '';
                 feedbackMsg.className = 'feedback-msg';
                 cardOverlay.classList.add('active');
                 cardVisible = true;
-                // Small delay then focus first input after flip
-                setTimeout(() => {
-                    if (!isFlipped && cardVisible && currentItem === itemName) {
-                        // Card is showing front; user needs to flip
-                    }
-                }, 100);
                 playDing();
             }
 
@@ -969,25 +981,9 @@
                 cardInner.classList.remove('flipped');
                 feedbackMsg.textContent = '';
                 feedbackMsg.className = 'feedback-msg';
-                inpInfinitive.value = '';
-                inpPastSimple.value = '';
-                inpPastParticiple.value = '';
-            }
-
-            function flipCard() {
-                if (!cardVisible) return;
-                isFlipped = !isFlipped;
-                if (isFlipped) {
-                    cardInner.classList.add('flipped');
-                    feedbackMsg.textContent = '';
-                    feedbackMsg.className = 'feedback-msg';
-                    inpInfinitive.value = '';
-                    inpPastSimple.value = '';
-                    inpPastParticiple.value = '';
-                    setTimeout(() => inpInfinitive.focus(), 400);
-                } else {
-                    cardInner.classList.remove('flipped');
-                }
+                inpAdjective.value = '';
+                inpComparative.value = '';
+                inpSuperlative.value = '';
             }
 
             function flipToBack() {
@@ -996,10 +992,10 @@
                 cardInner.classList.add('flipped');
                 feedbackMsg.textContent = '';
                 feedbackMsg.className = 'feedback-msg';
-                inpInfinitive.value = '';
-                inpPastSimple.value = '';
-                inpPastParticiple.value = '';
-                setTimeout(() => inpInfinitive.focus(), 400);
+                inpAdjective.value = '';
+                inpComparative.value = '';
+                inpSuperlative.value = '';
+                setTimeout(() => inpAdjective.focus(), 400);
             }
 
             function flipToFront() {
@@ -1008,33 +1004,37 @@
                 cardInner.classList.remove('flipped');
             }
 
+            function normalizeForm(str) {
+                return str.trim().toLowerCase().replace(/\s+/g, ' ');
+            }
+
             function checkAnswer() {
                 if (!cardVisible || !currentItem || !isFlipped) return;
                 const data = itemsData[currentItem];
-                const userInfinitive = inpInfinitive.value.trim().toLowerCase();
-                const userPastSimple = inpPastSimple.value.trim().toLowerCase();
-                const userPastParticiple = inpPastParticiple.value.trim().toLowerCase();
+                const userAdj = normalizeForm(inpAdjective.value);
+                const userComp = normalizeForm(inpComparative.value);
+                const userSup = normalizeForm(inpSuperlative.value);
 
-                const correctInfinitive = data.forms[0].toLowerCase();
-                const correctPastSimple = data.forms[1].toLowerCase();
-                const correctPastParticiple = data.forms[2].toLowerCase();
+                const correctAdj = normalizeForm(data.forms[0]);
+                const correctComp = normalizeForm(data.forms[1]);
+                const correctSupFull = normalizeForm(data.forms[2]); // e.g. "the tallest"
+                const correctSupBare = correctSupFull.replace(/^the\s+/, ''); // e.g. "tallest"
+                const userSupBare = userSup.replace(/^the\s+/, '');
 
-                if (
-                    userInfinitive === correctInfinitive &&
-                    userPastSimple === correctPastSimple &&
-                    userPastParticiple === correctPastParticiple
-                ) {
+                const adjOk = (userAdj === correctAdj);
+                const compOk = (userComp === correctComp);
+                const supOk = (userSup === correctSupFull || userSupBare === correctSupBare);
+
+                if (adjOk && compOk && supOk) {
                     // Correct!
                     feedbackMsg.textContent = '✓ Correct!';
                     feedbackMsg.className = 'feedback-msg correct';
                     playCorrectPeek();
-                    // Mark item as solved
                     solvedItems.add(currentItem);
                     const itemEl = document.querySelector(`.item[data-item="${currentItem}"]`);
                     if (itemEl) {
                         itemEl.classList.add('solved');
                     }
-                    // Award letter
                     if (lettersCollected < 8) {
                         const letter = letterSequence[lettersCollected];
                         const slotEl = document.getElementById('slot' + lettersCollected);
@@ -1045,30 +1045,29 @@
                         }
                         lettersCollected++;
                     }
-                    // Hide card after short delay
                     const solvedItem = currentItem;
                     setTimeout(() => {
                         hideCard();
-                        // Check if all letters collected
                         if (lettersCollected >= 8 && !treasureUnlocked) {
                             showCodeInput();
                         }
-                    }, 800);
+                    }, 750);
                 } else {
                     // Incorrect
                     feedbackMsg.textContent = '✗ Try again!';
                     feedbackMsg.className = 'feedback-msg incorrect';
                     playIncorrectLow();
-                    inpInfinitive.value = '';
-                    inpPastSimple.value = '';
-                    inpPastParticiple.value = '';
-                    setTimeout(() => inpInfinitive.focus(), 300);
+                    inpAdjective.value = '';
+                    inpComparative.value = '';
+                    inpSuperlative.value = '';
+                    setTimeout(() => inpAdjective.focus(), 300);
                 }
             }
 
-            // ============ CODE INPUT (when all 8 letters collected) ============
+            // ============ CODE INPUT ============
             function showCodeInput() {
                 codeOverlay.classList.add('active');
+                codeVisible = true;
                 inpFinalWord.value = '';
                 finalFeedback.textContent = '';
                 finalFeedback.className = 'feedback-msg';
@@ -1077,6 +1076,7 @@
 
             function hideCodeInput() {
                 codeOverlay.classList.remove('active');
+                codeVisible = false;
                 inpFinalWord.value = '';
                 finalFeedback.textContent = '';
                 finalFeedback.className = 'feedback-msg';
@@ -1086,6 +1086,7 @@
                 const userWord = inpFinalWord.value.trim().toUpperCase();
                 if (userWord === 'TREASURE') {
                     hideCodeInput();
+                    hideCard();
                     unlockTreasure();
                 } else {
                     finalFeedback.textContent = '✗ Wrong word. Try again!';
@@ -1098,22 +1099,15 @@
 
             function unlockTreasure() {
                 treasureUnlocked = true;
-                hideCard();
-                hideCodeInput();
-                // Show final overlay
+                bgLayer.classList.add('dimmed');
                 finalOverlay.classList.add('active');
-                finalMessage.textContent = 'You found Grandma\'s secret recipe! Well done!';
-                // Ensure images are visible
-                recipeCardImg.style.display = '';
-                pieImg.style.display = '';
-                finalImages.style.display = '';
-                // Start hearts
+                document.getElementById('finalMessage').textContent =
+                'You found Grandma\'s secret recipe! Well done!';
                 spawnHearts();
-                // Play melody
                 playVictoryMelody();
             }
 
-            // ============ HEARTS ANIMATION ============
+            // ============ HEARTS ============
             function spawnHearts() {
                 const heartEmojis = ['❤️', '🧡', '💛', '💖', '💝', '💕', '♥️', '💗'];
                 const count = 35;
@@ -1126,7 +1120,6 @@
                     heart.style.animationDelay = Math.random() * 3 + 's';
                     heart.style.fontSize = (18 + Math.random() * 32) + 'px';
                     heartsContainer.appendChild(heart);
-                    // Remove heart after animation
                     const totalDuration = parseFloat(heart.style.animationDuration) + parseFloat(heart.style
                         .animationDelay);
                     setTimeout(() => {
@@ -1137,23 +1130,20 @@
 
             // ============ EVENT LISTENERS ============
             // Item clicks
-            const allItemEls = document.querySelectorAll('.items-layer .item');
-            allItemEls.forEach(el => {
+            document.querySelectorAll('.items-layer .item').forEach(el => {
                 el.addEventListener('click', (e) => {
                     e.stopPropagation();
                     const itemName = el.getAttribute('data-item');
                     if (solvedItems.has(itemName)) return;
                     if (treasureUnlocked) return;
+                    if (codeVisible) return;
                     if (cardVisible && currentItem === itemName && !isFlipped) {
-                        // Same item clicked while card showing front → flip to back
                         flipToBack();
                         return;
                     }
                     if (cardVisible && currentItem === itemName && isFlipped) {
-                        // Already showing this item's back → do nothing special
                         return;
                     }
-                    // Show card for new item
                     showCard(itemName);
                 });
             });
@@ -1166,9 +1156,8 @@
                 }
             });
 
-            // Card back click on the card itself (not buttons/inputs) → do nothing special
+            // Card back click (not on buttons/inputs)
             cardBack.addEventListener('click', (e) => {
-                // Don't flip on back click; only buttons handle actions
                 e.stopPropagation();
             });
 
@@ -1190,8 +1179,8 @@
                 checkAnswer();
             });
 
-            // Keyboard: Enter on inputs triggers check
-            [inpInfinitive, inpPastSimple, inpPastParticiple].forEach(inp => {
+            // Enter key on inputs triggers check
+            [inpAdjective, inpComparative, inpSuperlative].forEach(inp => {
                 inp.addEventListener('keydown', (e) => {
                     if (e.key === 'Enter') {
                         e.preventDefault();
@@ -1207,9 +1196,9 @@
                 }
             });
 
-            // Code overlay background click → close
+            // Close code overlay on background click
             codeOverlay.addEventListener('click', (e) => {
-                if (e.target === codeOverlay) {
+                if (e.target === codeOverlay && !treasureUnlocked) {
                     hideCodeInput();
                 }
             });
@@ -1228,33 +1217,27 @@
                 }
             });
 
-            // Final overlay click (to dismiss? keep it visible)
+            // Re-trigger hearts on final overlay click
             finalOverlay.addEventListener('click', (e) => {
                 if (e.target === finalOverlay && treasureUnlocked) {
-                    // Re-spawn hearts on click
                     spawnHearts();
                     playVictoryMelody();
                 }
             });
 
-            // Escape key to close card
+            // Escape key to close card or code overlay
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
-                    if (cardVisible) {
-                        hideCard();
-                    }
-                    if (codeOverlay.classList.contains('active') && !treasureUnlocked) {
-                        hideCodeInput();
-                    }
+                    if (cardVisible) hideCard();
+                    if (codeVisible && !treasureUnlocked) hideCodeInput();
                 }
             });
 
             // ============ INITIALIZATION ============
-            // Hide code overlay and final overlay initially
             codeOverlay.classList.remove('active');
             finalOverlay.classList.remove('active');
             cardOverlay.classList.remove('active');
-            // Ensure all letter slots show underscores
+            bgLayer.classList.remove('dimmed');
             for (let i = 0; i < 8; i++) {
                 const slot = document.getElementById('slot' + i);
                 if (slot) {
@@ -1264,7 +1247,7 @@
                 }
             }
 
-            // Handle image loading errors gracefully
+            // Handle missing images gracefully
             document.querySelectorAll('img').forEach(img => {
                 img.addEventListener('error', () => {
                     img.style.display = 'none';
@@ -1272,10 +1255,9 @@
                 });
             });
 
-            console.log('🏠 Grandma\'s Attic Quest ready!');
-            console.log('📦 Items:', Object.keys(itemsData).length);
-            console.log('🔤 Secret word: T R E A S U R E');
-            console.log('👆 Click the glowing items to start!');
+            console.log('🏠 Grandma\'s Attic Quest — Adjectives Edition');
+            console.log('📦 8 items • Code word: T R E A S U R E');
+            console.log('👆 Click glowing items on the attic to start!');
         })();
     </script>
 </body>
